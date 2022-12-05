@@ -1,0 +1,8 @@
+selenium
+bs4 
+pandas 
+requests
+#json
+folium
+lxml
+html5lib
