@@ -73,7 +73,8 @@ def get_health_trusts(site=nhs_site, url=nhs_url):
 def get_hospitals(site, t_urld):
     """
     Get the addresses of hospitals within the NHS Trusts
-    return a dict of id, list of [title:string, url:string, address:list of [address components]]
+    return a dict of id, list of [title:string, url:string,
+        address:list of [address components], trust_id]
     """
     if not test_uri.uri_match(site):
         print("site", site, "is not a value URI")
@@ -86,8 +87,8 @@ def get_hospitals(site, t_urld):
     #  [[ hospital_address, lines, postcode ],
     #  "hospital name",
     #  "hospital URL" }
-    for key in list(t_urld.keys()):
-        url = t_urld[key][0]
+    for trust_key in list(t_urld.keys()):
+        url = t_urld[trust_key][0]
         (a, b) = re.search('Overview', url).span()
         # As the NHS trust website give a list of the trusts, each trust
         # site first provides an overview, but the section we need is the
@@ -98,37 +99,39 @@ def get_hospitals(site, t_urld):
         page = driver.page_source
         soup = BeSoup(page, "lxml")
 
-        hospitals = soup.find_all('div', class_=['box-list clear hospital-list','box-list clear clinic-list'])
+        hospitals = soup.find_all('div', class_=['box-list clear hospital-list',
+                                                 'box-list clear clinic-list'])
 
         # Hospitals and clinics, not "others", as the format is different
         for H in hospitals[0:2]:
             # variables reset for each hospital
             for addrs in H.find_all('dd', class_='addrss'):
                 # returns a list with alternate elements containing address
-                # the "contents[1].a" accesses the contents of the grandparent 'a' tag
+                # the "contents[1].a" accesses the contents of the
+                # grandparent 'a' tag
                 link = addrs.parent.parent.contents[1].a
                 if link is not None:
-                    h_dict[link.get('href').split('id=')[-1]] = [link.text, link.get('href'), addrs.contents[::2]]
+                    h_dict[link.get('href').split('id=')[-1]] \
+                        = [link.text, link.get('href'),
+                           addrs.contents[::2], trust_key]
                 else:
                     print("addrs does not have a linked parent:", addrs)
         print(len(h_dict.keys()))
     driver.close()
     return h_dict
 
-
 #        NHS_Trust_List = content.find_all('div', class_='ubsf_sitemap-location-address')
-
 
 def make_dataset(h_dict):
     # Create dataset
     with open('NHSHospitals.csv', mode='w', newline='') as outputFile:
         hospitals_csv = csv.writer(outputFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        hospitals_csv.writerow(['id', 'Hospital', 'URL', 'Address'])
+        hospitals_csv.writerow(['id', 'Trust_id', 'Hospital', 'URL', 'Address'])
         for key in h_dict.keys():
             hospital_url = h_dict[key][1]
             if not test_uri.uri_match(hospital_url):
                 hospital_url = nhs_site + hospital_url   # may have two "/" in url
-            hospitals_csv.writerow([key, h_dict[key][0], hospital_url, ",".join(h_dict[key][2])])
+            hospitals_csv.writerow([key, h_dict[key][3], h_dict[key][0], hospital_url, ",".join(h_dict[key][2])])
 
 
 if __name__ == '__main__':
