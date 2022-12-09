@@ -6,12 +6,14 @@ Date: 2022-12-01
 """
 
 from selenium import webdriver
-# from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as expcond
+from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup as BeSoup
-from time import sleep
 import csv
 import re  # regular expression
-
+import os
 import test_uri
 
 nhs_site = 'https://www.nhs.uk/'
@@ -24,8 +26,15 @@ def get_health_trusts(site=nhs_site, url=nhs_url):
     driver = webdriver.Chrome()
     if test_uri.uri_match(site):
         driver.get(site + url)
+        timeout = 10
+        try:
+            element_present = expcond.presence_of_element_located((By.CLASS_NAME, 'trust-list'))
+            WebDriverWait(driver, timeout).until(element_present)
+        except TimeoutException:
+            print("Timed out waiting for page to load")
+        finally:
+            print("scanning web page")
 
-        sleep(10)  # give time for all javascripts to be finished running
         page = driver.page_source
         soup = BeSoup(page, "lxml")
         driver.close()
@@ -95,7 +104,15 @@ def get_hospitals(site, t_urld):
         # hospitals and clinics, hence
         # replace "Overview" with Hospitals and Clinics in url
         driver.get(site + url[:a] + 'HospitalsAndClinics' + url[b:])
-        sleep(10)  # give time for all javascripts to be finished running
+        timeout = 10
+        try:
+            element_present = expcond.presence_of_element_located((By.CLASS_NAME, 'panel-content'))
+            WebDriverWait(driver, timeout).until(element_present)
+        except TimeoutException:
+            print("Timed out waiting for page to load")
+        finally:
+            print("scanning web page")
+
         page = driver.page_source
         soup = BeSoup(page, "lxml")
 
@@ -120,24 +137,32 @@ def get_hospitals(site, t_urld):
     driver.close()
     return h_dict
 
-#        NHS_Trust_List = content.find_all('div', class_='ubsf_sitemap-location-address')
 
-def make_dataset(h_dict):
+def make_dataset(file_name, t_dict, h_dict):
     # Create dataset
-    with open('NHSHospitals.csv', mode='w', newline='') as outputFile:
-        hospitals_csv = csv.writer(outputFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        hospitals_csv.writerow(['id', 'Trust_id', 'Hospital', 'URL', 'Address'])
+    with open(file_name, mode='w', newline='', encoding='utf-8') as outputFile:
+        hospitals_csv = csv.writer(outputFile, delimiter=',',
+                                   quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        hospitals_csv.writerow(['id', 'Hospital', 'URL', 'Address',
+                                'TrustID', 'TrustName', 'TrustURL'])
         for key in h_dict.keys():
             hospital_url = h_dict[key][1]
             if not test_uri.uri_match(hospital_url):
                 hospital_url = nhs_site + hospital_url   # may have two "/" in url
-            hospitals_csv.writerow([key, h_dict[key][3], h_dict[key][0], hospital_url, ",".join(h_dict[key][2])])
+            t_key = h_dict[key][3]
+            hospitals_csv.writerow([key, h_dict[key][0], hospital_url,
+                                    ",".join(h_dict[key][2]), t_key,
+                                    t_dict[t_key][1], t_dict[t_key][0]])
 
 
 if __name__ == '__main__':
+    data_file_name = os.getenv('HOSPITALS_CSV', '')
+    assert len(data_file_name) > 3, \
+        f"Expected filename with more the three characters, got: {len(data_file_name)}"
+
     trust_dict = get_health_trusts(nhs_site, nhs_url)
     hospital_dict = get_hospitals(nhs_site, trust_dict)
-    make_dataset(hospital_dict)
+    make_dataset(data_file_name, trust_dict, hospital_dict)
     """
         Direct run process.
     """
