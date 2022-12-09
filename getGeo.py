@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import json
 import os
+from time import sleep
 
 # loop around the file 100 lines at a time, incrementing by 100*x
 # x = 0 - rows 0 to 99 (0 * x + row)
@@ -72,7 +73,8 @@ def postcode_to_geo(addrs_df, mq_key):
                 postcode_dict[postcode] = json.loads(data)['results']
             else:
                 print("response not OK:", response.status_code, postcode)
-                break
+                sleep(10)   # pause the requests for 10 seconds
+                continue
         else:
             print('Existing postcode ', postcode, " for ", api_address)
 
