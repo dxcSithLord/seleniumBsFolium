@@ -1,0 +1,7 @@
+id,Hospital,URL,Address,TrustID,TrustName,TrustURL
+805,Airedale General Hospital,https://www.nhs.uk//Services/hospitals/Overview/DefaultView.aspx?id=805,"Skipton Road,Steeton,Keighley,West Yorkshire,BD20 6TD",103,Airedale NHS Foundation Trust,/Services/Trusts/Overview/DefaultView.aspx?id=103
+139,Castleberg Hospital,https://www.nhs.uk//Services/hospitals/Overview/DefaultView.aspx?id=139,"Raines Road,Giggleswick,Settle,North Yorkshire,BD24 0BN",103,Airedale NHS Foundation Trust,/Services/Trusts/Overview/DefaultView.aspx?id=103
+365,Skipton General Hospital,https://www.nhs.uk//Services/hospitals/Overview/DefaultView.aspx?id=365,"Keighley Road,Skipton,North Yorkshire,BD23 2RJ",103,Airedale NHS Foundation Trust,/Services/Trusts/Overview/DefaultView.aspx?id=103
+122377,Bentham Health Centre,https://www.nhs.uk//Services/clinics/Overview/DefaultView.aspx?id=122377,"Grasmere Drive,Bentham,Lancaster,Lancashire,LA2 7JP",103,Airedale NHS Foundation Trust,/Services/Trusts/Overview/DefaultView.aspx?id=103
+99437,Canalside Health Centre,https://www.nhs.uk//Services/clinics/Overview/DefaultView.aspx?id=99437,"2 Kingsway,Bingley,West Yorkshire,BD16 4RP",103,Airedale NHS Foundation Trust,/Services/Trusts/Overview/DefaultView.aspx?id=103
+128362,Colne Health Centre,https://www.nhs.uk//Services/clinics/Overview/DefaultView.aspx?id=128362,"Craddock Road,Colne,Lancashire,BB8 0JZ",103,Airedale NHS Foundation Trust,/Services/Trusts/Overview/DefaultView.aspx?id=103
