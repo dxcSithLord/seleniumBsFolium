@@ -4,13 +4,7 @@ import json
 import os
 from time import sleep
 
-# loop around the file 100 lines at a time, incrementing by 100*x
-# x = 0 - rows 0 to 99 (0 * x + row)
-# x = 1 - rows 100 to 199 (1 * x + row)
-
-# addrs_df = pd.read_csv("NHSHospitals.csv", encoding="utf-8",
-#       skiprows=lambda x:x in range(1,100], nrows=100, names=('id','Hospital','URL','Address'))
-# pd.set_option('display.max_rows', None)
+mapquest_url = 'http://www.mapquestapi.com/geocoding/v1/address'
 
 
 def get_file_data(filename):
@@ -19,7 +13,7 @@ def get_file_data(filename):
     return dataframe
 
 
-def postcode_to_geo(addrs_df, mq_key):
+def postcode_to_geo(addrs_df, mq_key, geo_file):
     postcode_dict = {}
     call_count = 0
     for i, row in addrs_df.iterrows():
@@ -65,7 +59,7 @@ def postcode_to_geo(addrs_df, mq_key):
                 "location": api_address
             }
 
-            response = requests.get("http://www.mapquestapi.com/geocoding/v1/address", params=parameters)
+            response = requests.get(mapquest_url, params=parameters)
             if response.status_code == 200:
                 print('postcode ', postcode, ' response ', response)
                 call_count += 1
@@ -85,16 +79,17 @@ def postcode_to_geo(addrs_df, mq_key):
         addrs_df.at[i, 'Longitude'] = lng
 
     print("Calls to mapquest ", call_count)
-    addrs_df.to_csv('NHSHospitals_Geo_2.csv')
+    addrs_df.to_csv(geo_file)
 
 
 if __name__ == '__main__':
-    data_file_name = os.getenv('HOSPITALS_CSV', '')
+    data_file_name = os.getenv('HOSPITALS_CSV', 'hospitals.csv')
+    geo_file_name = os.getenv('HOSPITALS_GEO','hospitals_geo.csv')
     api_key = os.getenv('MAPQUEST_API_KEY', '')
     assert len(data_file_name) > 3, \
         f"Expected filename with more the three characters, got: {len(data_file_name)}"
     assert len(api_key) == 32, \
-        f"Expected api key to be 32 characters long - please check.  Key lenget: {len(api_key)}"
+        f"Expected api key to be 32 characters long - please check.  Key length: {len(api_key)}"
     hospital_addrs = get_file_data(data_file_name)
     # TOTread parameters from config
-    postcode_to_geo(hospital_addrs, api_key)
+    postcode_to_geo(hospital_addrs, api_key, geo_file_name)
