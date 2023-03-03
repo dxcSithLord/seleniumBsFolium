@@ -13,6 +13,15 @@ def get_file_data(filename):
     return dataframe
 
 
+def validate_geo(location=(51, 0), lat_range=(49, 61), long_range=(-10, 2)):
+    retval = False
+
+    if lat_range[0] <= location <= lat_range[1] and long_range[0] <= location[1] <= long_range[1]:
+        retval = True
+
+    return retval
+
+
 def postcode_to_geo(addrs_df, mq_key, geo_file):
     postcode_dict = {}
     call_count = 0
@@ -83,9 +92,10 @@ def postcode_to_geo(addrs_df, mq_key, geo_file):
 
 
 if __name__ == '__main__':
-    data_file_name = os.getenv('HOSPITALS_CSV', 'hospitals.csv')
-    geo_file_name = os.getenv('HOSPITALS_GEO','hospitals_geo.csv')
-    api_key = os.getenv('MAPQUEST_API_KEY', '')
+    data_file_name = os.getenv('HOSPITALS_CSV', 'Current_NHS_Hospitals_in_Scotland_Dec22.csv')
+    geo_file_name = os.getenv('HOSPITALS_GEO', 'Current_NHS_Hospitals_in_Scotland_Geo_Dec22.csv')
+    api_key = os.getenv('MAPQUEST_API_KEY', "0123456789abcdefghijABCDEFGHIJKL")
+
     assert len(data_file_name) > 3, \
         f"Expected filename with more the three characters, got: {len(data_file_name)}"
     assert len(api_key) == 32, \
