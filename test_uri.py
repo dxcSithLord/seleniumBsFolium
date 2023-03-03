@@ -1,4 +1,4 @@
-'''
+"""
     Description: Ref ref https://www.rfc-editor.org/rfc/rfc3986#appendix-B
     To test for a URL, the following regular expression maps to URI components
     based on the RFC3986:
@@ -25,7 +25,7 @@
       $9 = Related
     functions:
     uri_match - returns true is uri contains http[s]:/site as part of the url
-'''
+"""
 import re     # regular expressions
 
 RFC3986_re = r'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?'
@@ -43,7 +43,6 @@ def uri_match(href):
     if len(url_list) > 1:
         ret_val = True
     else:
-        if 'http' in url_list[0][1] and url_list[0][2] != '':
+        if ('http' in url_list[0][1] or 'file' in url_list[0][1]) and url_list[0][2] != '':
             ret_val = True
     return ret_val
-
